@@ -1,0 +1,109 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+<style type="text/css">
+    thead {
+        background-color:palegoldenrod;
+    }
+</style>
+
+ 
+<script src="~/Scripts/jquery-2.1.0.min.js"></script>
+<script src="~/Scripts/knockout-3.1.0.js"></script>
+
+<div>
+    Top Records:
+        <select id="lstpagesize">
+             <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+        </select> 
+  Skip Records:
+    <select id="lstpageindex">
+         <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+        </select> 
+    <input type="button" id="btngetdata" value="Get Data" data-bind="click: EmpModel.GetRecord"/>
+</div>
+
+
+<table border="1">
+    <thead> 
+  <tr> 
+   <th>EmpNo</th> 
+   <th>EmpName</th> 
+   <th>Salary</th> 
+   <th>DeptName</th> 
+   <th>Designation</th> 
+</tr> 
+</thead> 
+    <tbody data-bind="template: { name: 'EmpData', foreach: EmpModel.Employees }"> 
+</tbody> 
+</table>
+
+
+<script type="text/html" id="EmpData">
+    <tr> 
+  <td> 
+   <span   style="width:100px;"  data-bind="text: $data.EmpNo" /> 
+  </td> 
+  <td> 
+   <span style="width:100px;"  data-bind="text: $data.EmpName" /> 
+  </td> 
+  <td> 
+   <span style="width:100px;"  data-bind="text: $data.Salary" /> 
+  </td> 
+  <td> 
+   <span style="width:100px;"  data-bind="text: $data.DeptName"  /> 
+  </td> 
+  <td> 
+   <span style="width:100px;"  data-bind="text: $data.Designation" />
+  </td> 
+</tr> 
+
+</script>
+
+<script type="text/javascript">
+    //The mode defining the observable array
+    var EmpModel = {
+        Employees:ko.observableArray([])
+    };
+    //The method to get the records
+    EmpModel.GetRecord = function ()
+    {
+        EmpModel.Employees([]);
+        //Get the Page Records to be skipped based upon the page index
+        var recordPerPage = $("#lstpagesize").find(":selected").val();
+        var selectedPageIndex = $("#lstpageindex").find(":selected").val();
+
+        //The URL for the WEB API
+        //This selects the Top records and the page index and skip those records from the data to be fetch 
+         var url = "/api/EmployeeInfoAPI?$top=" + recordPerPage + '&$skip=' + (selectedPageIndex * recordPerPage) + '&$orderby=EmpNo';
+
+    alert(url);
+
+        //Makes an ajax call
+        $.ajax({
+            type: "GET",
+            url: url,
+            success: function (data)
+            {
+                EmpModel.Employees(data);
+            },
+            error: function (err)
+            {
+                alert(err.status + "<--------->" + err.statusCode);
+            }
+        });
+    };
+    ko.applyBindings(EmpModel);
+</script>
